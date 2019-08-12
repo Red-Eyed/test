@@ -3,19 +3,14 @@ from time import sleep
 
 import cupy
 
-# overlapping
-# size = 1000000
-# cycles = 1000
-# streams_num = 8
-
-size = 1000000
-cycles = 1000
+size = 512
+cycles = 10
 streams_num = 8
 
 streams = [cupy.cuda.Stream() for _ in range(streams_num)]
 
 with cupy.cuda.Stream():
-    x = cupy.ones((size,))
+    x = cupy.ones((size, size, 4))
 
 
 def f(stream):
@@ -27,6 +22,6 @@ def f(stream):
 
 e = ThreadPoolExecutor(12)
 
-list(e.map(f, streams))
+list(map(f, streams))
 
 sleep(1)
