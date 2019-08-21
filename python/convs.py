@@ -8,10 +8,18 @@ from torch.nn import functional as F
 
 from utils.cv import show
 
+
+def sin2d(size, period, phase):
+    plane = torch.arange(0., size, 1.)
+    _, plane = torch.meshgrid([plane, plane])
+    plane = torch.sin(period * plane + phase)
+    return plane
+
+
 if __name__ == '__main__':
-    img = cv2.imread("/home/vstupakov/Downloads/image (1).png", cv2.IMREAD_GRAYSCALE).astype(np.float32)
-    show("orig", img)
     torch.set_default_tensor_type(torch.FloatTensor)
+    img = sin2d(800, 1 / 100, 0)
+    show("orig", img.numpy())
 
     w, h = 10, 10
     # mean filter
@@ -32,12 +40,15 @@ if __name__ == '__main__':
     y = torch.arange(-6, 6, dy)
     x2d, y2d = torch.meshgrid([x, y])
     kernel = torch.exp(-(x2d ** 2 + y2d ** 2) / (2 * sigma ** 2))
-    plt.imshow(kernel, cmap="jet")
+    show("gauss kernel", kernel.numpy(), cmap="jet")
     kernel = kernel.reshape((1, 1, *kernel.shape))
-
     out = F.conv2d(img_tensor, kernel)
-    filter_gauss = np.squeeze(out.cpu().numpy())
-    show("gauss", filter_gauss)
+    show("gauss", np.squeeze(out.cpu().numpy()))
+
+    # derivative
+    kernel = torch.tensor([1., -1.]).reshape(1, 1, 1, 2)
+    out = F.conv2d(img_tensor, kernel)
+    show("derive", np.squeeze(out.cpu().numpy()))
 
     plt.show()
     cv2.waitKey()
