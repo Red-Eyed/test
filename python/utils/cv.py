@@ -14,4 +14,4 @@ def show(name: str, img: np.ndarray, cmap: str = "gray"):
     img = norm_minmax(img) * 255
 
     plt.figure(name)
-    plt.imshow(img.astype(np.uint8), cmap="gray")
+    plt.imshow(img.astype(np.uint8), cmap=cmap)
