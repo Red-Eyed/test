@@ -2,29 +2,31 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.ndimage import gaussian_filter1d
-from scipy.signal import convolve
 
 from utils.cv import show, norm_minmax
-
-
-def find_peaks(array: np.ndarray):
-    array = norm_minmax(array)
-    smoothed = norm_minmax(gaussian_filter1d(array, 10))
-    plt.plot(smoothed)
-    derivative = convolve(smoothed, [2.0, -2.0], "same")
-    derivative2 = convolve(derivative, [2.0, -2.0], "same")
-
-    plt.plot(derivative)
-    plt.plot(derivative2)
-
-    plt.show()
+from utils.signal import find_peaks1d
 
 
 def preprocess(img: np.ndarray):
-    img = norm_minmax(img)
+    img = norm_minmax(img) * 255
 
-    mask1 = img > np.mean(img) / 1.5
+    hist, bins = np.histogram(img.reshape(-1).astype(np.int32), bins=255)
+    smoothed = norm_minmax(gaussian_filter1d(hist, 10))
+    peaks = find_peaks1d(smoothed)
+
+    img /= 255
+
+    if np.sum(peaks) == 2:
+        separator = np.mean(np.where(peaks == 1)) / 255
+    elif np.sum(peaks) == 1:
+        separator = 1
+    else:
+        raise RuntimeError
+
+    mask1 = img > separator
     mask2 = np.logical_not(mask1)
+
+    plt.show()
 
     img1 = img * mask1
     img2 = img * mask2
@@ -68,12 +70,6 @@ def roughness(img):
 
 if __name__ == '__main__':
     img = cv2.imread("/home/redeyed/Desktop/Tile_001_00131.png", cv2.IMREAD_GRAYSCALE).astype(np.float32)
-    plt.hist(img.reshape(-1).astype(np.int32), bins=255)
-    plt.show()
-
-    hist, bins = np.histogram(img.reshape(-1).astype(np.int32), bins=255)
-    find_peaks(hist)
-
     show("orig", img)
 
     preprocessed = preprocess(img)
