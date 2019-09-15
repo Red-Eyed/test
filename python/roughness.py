@@ -1,8 +1,23 @@
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.ndimage import gaussian_filter1d
+from scipy.signal import convolve
 
 from utils.cv import show, norm_minmax
+
+
+def find_peaks(array: np.ndarray):
+    array = norm_minmax(array)
+    smoothed = norm_minmax(gaussian_filter1d(array, 10))
+    plt.plot(smoothed)
+    derivative = convolve(smoothed, [2.0, -2.0], "same")
+    derivative2 = convolve(derivative, [2.0, -2.0], "same")
+
+    plt.plot(derivative)
+    plt.plot(derivative2)
+
+    plt.show()
 
 
 def preprocess(img: np.ndarray):
@@ -53,6 +68,12 @@ def roughness(img):
 
 if __name__ == '__main__':
     img = cv2.imread("/home/redeyed/Desktop/Tile_001_00131.png", cv2.IMREAD_GRAYSCALE).astype(np.float32)
+    plt.hist(img.reshape(-1).astype(np.int32), bins=255)
+    plt.show()
+
+    hist, bins = np.histogram(img.reshape(-1).astype(np.int32), bins=255)
+    find_peaks(hist)
+
     show("orig", img)
 
     preprocessed = preprocess(img)
