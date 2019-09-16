@@ -11,7 +11,7 @@ def preprocess(img: np.ndarray):
     img = norm_minmax(img) * 255
 
     hist, bins = np.histogram(img.reshape(-1).astype(np.int32), bins=255)
-    smoothed = norm_minmax(gaussian_filter1d(hist, 10))
+    smoothed = norm_minmax(gaussian_filter1d(hist, sigma=20))
     peaks = find_peaks1d(smoothed)
 
     img /= 255
@@ -24,9 +24,7 @@ def preprocess(img: np.ndarray):
         raise RuntimeError
 
     mask1 = img > separator
-    mask2 = np.logical_not(mask1)
-
-    plt.show()
+    mask2 = img <= separator
 
     img1 = img * mask1
     img2 = img * mask2
