@@ -10,4 +10,4 @@ def find_peaks1d(array: np.ndarray):
     sign_change[[0, -1]] = 0
     peaks = sign_change == sign_change.min()
 
-    return peaks
+    return np.uint32(peaks)
