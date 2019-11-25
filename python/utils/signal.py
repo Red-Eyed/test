@@ -15,3 +15,9 @@ def find_peaks1d(array: np.ndarray):
     peaks = dsign == dsign.min()
 
     return np.uint32(peaks)
+
+
+def running_avarage(array: np.ndarray, points_num):
+    kernel = np.ones(points_num) / points_num
+    result = convolve(array, kernel, "same")
+    return result
